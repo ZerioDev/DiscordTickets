@@ -8,10 +8,16 @@ module.exports = async (client, int) => {
             if (!channel) {
                 await int.guild.channels.create(`ticket-${int.member.id}`, {
                     type: 'GUILD_TEXT',
-                    permissionOverwrites: [{
-                        id: int.guild.id,
-                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
-                    }]
+                    permissionOverwrites: [
+                        {
+                            id: int.guild.id,
+                            deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                        },
+                        {
+                            id: int.member.id,
+                            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                        }
+                    ]
                 });
 
                 const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
