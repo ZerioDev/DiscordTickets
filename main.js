@@ -12,5 +12,3 @@ client.config = require('./config');
 require('./src/loader');
 
 client.login(client.config.dsc.token);
-
-client.on('ready', () => console.log('Ready !'));
