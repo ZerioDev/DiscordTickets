@@ -9,3 +9,9 @@ A cool Discord bot to manage tickets on your server 🎫
 Why search complicated when you can just click a button ?
 
 ![Setup](./img/setup.png)
+
+Responding to a ticket is easy !
+
+No need to search for hours, use also the buttons.
+
+![Ticket](./img/ticket.png)
