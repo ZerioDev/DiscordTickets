@@ -5,7 +5,7 @@ module.exports = async (client, int) => {
 
     console.log(int)
 
-    switch (int.customId) {
+    switch (int.customId.split('_')[0]) {
         case 'newTicket': {
             const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
 
@@ -40,7 +40,7 @@ module.exports = async (client, int) => {
 
                 closeButton.setStyle('DANGER');
                 closeButton.setLabel('Close this ticket');
-                closeButton.setCustomId('closeTicket');
+                closeButton.setCustomId(`closeTicket_${int.member.id}`);
 
                 const row = new MessageActionRow().addComponents(closeButton);
 
@@ -62,7 +62,7 @@ module.exports = async (client, int) => {
                         deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
                     },
                     {
-                        id: int.member.id,
+                        id: int.customId.split('_')[1],
                         deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
                     },
                     {
@@ -82,7 +82,7 @@ module.exports = async (client, int) => {
 
             reopenButton.setStyle('SUCCESS');
             reopenButton.setLabel('Reopen this ticket');
-            reopenButton.setCustomId('reopenTicket');
+            reopenButton.setCustomId(`reopenTicket_${int.customId.split('_')[1]}`);
 
             const deleteButton = new MessageButton();
 
@@ -91,6 +91,43 @@ module.exports = async (client, int) => {
             deleteButton.setCustomId('deleteTicket');
 
             const row = new MessageActionRow().addComponents(reopenButton, deleteButton);
+
+            return int.reply({ embeds: [ticketEmbed], components: [row] });
+        }
+
+        case 'reopenTicket': {
+            const channel = int.guild.channels.cache.get(int.channelId);
+
+            await channel.edit({
+                permissionOverwrites: [
+                    {
+                        id: int.guild.id,
+                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    },
+                    {
+                        id: int.customId.split('_')[1],
+                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    },
+                    {
+                        id: client.user.id,
+                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    }
+                ]
+            });
+
+            const ticketEmbed = new MessageEmbed();
+
+            ticketEmbed.setColor('GREEN');
+            ticketEmbed.setAuthor(`The ticket has been reopened ✅`);
+            ticketEmbed.setDescription('*To close the current ticket click on the reaction below, warning it is impossible to go back !*');
+
+            const closeButton = new MessageButton();
+
+            closeButton.setStyle('DANGER');
+            closeButton.setLabel('Close this ticket');
+            closeButton.setCustomId(`closeTicket_${int.customId.split('_')[1]}`);
+
+            const row = new MessageActionRow().addComponents(closeButton);
 
             return int.reply({ embeds: [ticketEmbed], components: [row] });
         }
