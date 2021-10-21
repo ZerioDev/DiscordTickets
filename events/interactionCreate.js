@@ -3,6 +3,8 @@ const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 module.exports = async (client, int) => {
     if (!int.isButton()) return;
 
+    console.log(int)
+
     switch (int.customId) {
         case 'newTicket': {
             const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
@@ -48,6 +50,49 @@ module.exports = async (client, int) => {
             } else {
                 return int.reply({ content: `You already have an open ticket <#${channel.id}> ❌`, ephemeral: true });
             }
+        }
+
+        case 'closeTicket': {
+            const channel = int.guild.channels.cache.get(int.channelId);
+
+            await channel.edit({
+                permissionOverwrites: [
+                    {
+                        id: int.guild.id,
+                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    },
+                    {
+                        id: int.member.id,
+                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    },
+                    {
+                        id: client.user.id,
+                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
+                    }
+                ]
+            });
+
+            const ticketEmbed = new MessageEmbed();
+
+            ticketEmbed.setColor('RED');
+            ticketEmbed.setAuthor(`${int.member.user.username} has decided to close this ticket ❌`);
+            ticketEmbed.setDescription('*To permanently delete the ticket or to reopen the ticket click on the button below.*');
+
+            const reopenButton = new MessageButton();
+
+            reopenButton.setStyle('SUCCESS');
+            reopenButton.setLabel('Reopen this ticket');
+            reopenButton.setCustomId('reopenTicket');
+
+            const deleteButton = new MessageButton();
+
+            deleteButton.setStyle('DANGER');
+            deleteButton.setLabel('Delete this ticket');
+            deleteButton.setCustomId('deleteTicket');
+
+            const row = new MessageActionRow().addComponents(reopenButton, deleteButton);
+
+            return int.reply({ embeds: [ticketEmbed], components: [row] });
         }
     }
 };
