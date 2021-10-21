@@ -3,6 +3,8 @@ const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 module.exports = async (client, int) => {
     if (!int.isButton()) return;
 
+    client.emit('ticketsLogs', int.customId.split('_')[0], int.guild, int.member.user);
+
     switch (int.customId.split('_')[0]) {
         case 'newTicket': {
             const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
