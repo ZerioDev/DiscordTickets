@@ -16,6 +16,7 @@ module.exports = {
 
         const ticketButton = new MessageButton();
 
+        ticketButton.setEmoji('🔓');
         ticketButton.setStyle('SUCCESS');
         ticketButton.setLabel('Open a ticket');
         ticketButton.setCustomId('newTicket');
