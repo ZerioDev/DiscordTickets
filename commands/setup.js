@@ -1,9 +1,13 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { Permissions, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 
 module.exports = {
     name: 'setup',
 
     execute(client, message) {
+        if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
+            return message.channel.send('You need to have the **manage messages** permission to use this command ❌');
+        }
+
         const setupEmbed = new MessageEmbed();
 
         setupEmbed.setColor('GREEN');
