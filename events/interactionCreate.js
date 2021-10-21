@@ -3,8 +3,6 @@ const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 module.exports = async (client, int) => {
     if (!int.isButton()) return;
 
-    console.log(int)
-
     switch (int.customId.split('_')[0]) {
         case 'newTicket': {
             const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
@@ -130,6 +128,12 @@ module.exports = async (client, int) => {
             const row = new MessageActionRow().addComponents(closeButton);
 
             return int.reply({ embeds: [ticketEmbed], components: [row] });
+        }
+
+        case 'deleteTicket': {
+            const channel = int.guild.channels.cache.get(int.channelId);
+
+            return channel.delete();
         }
     }
 };
