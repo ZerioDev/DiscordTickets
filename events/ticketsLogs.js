@@ -15,5 +15,9 @@ module.exports = (client, type, guild, user) => {
         case 'deleteTicket': {
             return console.log(`${user.username} just deleted a ticket on the server ${guild.name}`);
         }
+
+        case 'saveTicket': {
+            return console.log(`${user.username} just saved a ticket on the server ${guild.name}`);
+        }
     }
 };
