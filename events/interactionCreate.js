@@ -1,13 +1,44 @@
 const { createWriteStream } = require('fs');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageEmbed, MessageSelectMenu, MessageActionRow, MessageButton } = require('discord.js');
 
 module.exports = async (client, int) => {
-    if (!int.isButton()) return;
-
     client.emit('ticketsLogs', int.customId.split('_')[0], int.guild, int.member.user);
 
     switch (int.customId.split('_')[0]) {
+        case 'createTicket': {
+            const selectMenu = new MessageSelectMenu();
+
+            selectMenu.setCustomId('newTicket');
+            selectMenu.setPlaceholder('Choose a reason for the ticket');
+            selectMenu.addOptions([
+                {
+                    emoji: '🐛',
+                    label: 'None',
+                    description: 'No reason',
+                    value: 'newTicket'
+                },
+                {
+                    emoji: '🦙',
+                    label: 'Support',
+                    description: 'Ask for help',
+                    value: 'newTicket_Support'
+                },
+                {
+                    emoji: '🐎',
+                    label: 'Moderation',
+                    description: 'Talking with the team',
+                    value: 'newTicket_Moderation'
+                },
+            ]);
+
+            const row = new MessageActionRow().addComponents(selectMenu);
+
+            return int.reply({ content: 'What will be the reason for the ticket ?', components: [row], ephemeral: true });
+        }
+
         case 'newTicket': {
+            const reason = int.values[0].split('_')[1];
+
             const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
 
             if (!channel) {
@@ -34,7 +65,7 @@ module.exports = async (client, int) => {
                 const ticketEmbed = new MessageEmbed();
 
                 ticketEmbed.setColor('GREEN');
-                ticketEmbed.setAuthor(`Your ticket has been successfully created ${int.member.user.username} ✅`);
+                ticketEmbed.setAuthor(`Your ticket has been successfully created ${int.member.user.username}${reason ? ` (${reason})` : ''} ✅`);
                 ticketEmbed.setDescription('*To close the current ticket click on the reaction below, warning it is impossible to go back !*');
 
                 const closeButton = new MessageButton();
@@ -47,9 +78,9 @@ module.exports = async (client, int) => {
 
                 await channel.send({ embeds: [ticketEmbed], components: [row] });
 
-                return int.reply({ content: `Your ticket is open <@${int.member.id}> <#${channel.id}> ✅`, ephemeral: true });
+                return int.update({ content: `Your ticket is open <@${int.member.id}> <#${channel.id}> ✅`, components: [], ephemeral: true });
             } else {
-                return int.reply({ content: `You already have an open ticket <#${channel.id}> ❌`, ephemeral: true });
+                return int.update({ content: `You already have an open ticket <#${channel.id}> ❌`, components: [], ephemeral: true });
             }
         }
 

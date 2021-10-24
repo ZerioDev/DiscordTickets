@@ -19,7 +19,7 @@ module.exports = {
         ticketButton.setEmoji('🔓');
         ticketButton.setStyle('SUCCESS');
         ticketButton.setLabel('Open a ticket');
-        ticketButton.setCustomId('newTicket');
+        ticketButton.setCustomId('createTicket');
 
         const row = new MessageActionRow().addComponents(ticketButton);
 
