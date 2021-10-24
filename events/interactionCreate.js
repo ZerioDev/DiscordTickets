@@ -2,9 +2,11 @@ const { createWriteStream } = require('fs');
 const { MessageEmbed, MessageSelectMenu, MessageActionRow, MessageButton } = require('discord.js');
 
 module.exports = async (client, int) => {
-    client.emit('ticketsLogs', int.customId.split('_')[0], int.guild, int.member.user);
+    const req = int.customId.split('_')[0];
 
-    switch (int.customId.split('_')[0]) {
+    client.emit('ticketsLogs', req, int.guild, int.member.user);
+
+    switch (req) {
         case 'createTicket': {
             const selectMenu = new MessageSelectMenu();
 
