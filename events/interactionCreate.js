@@ -44,6 +44,7 @@ module.exports = async (client, int) => {
             if (!channel) {
                 await int.guild.channels.create(`ticket-${int.member.id}`, {
                     type: 'GUILD_TEXT',
+                    topic: `Ticket created by ${int.member.user.username}${reason ? ` (${reason})` : ''} ${new Date(Date.now()).toLocaleString()}`,
                     permissionOverwrites: [
                         {
                             id: int.guild.id,
