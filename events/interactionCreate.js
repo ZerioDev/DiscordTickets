@@ -11,124 +11,168 @@ module.exports = async (client, int) => {
             const selectMenu = new MessageSelectMenu();
 
             selectMenu.setCustomId('newTicket');
-            selectMenu.setPlaceholder('Choose a reason for the ticket');
+            selectMenu.setPlaceholder('Выберите причину для тикета');
             selectMenu.addOptions([
-                {
-                    emoji: '🐛',
-                    label: 'None',
-                    description: 'No reason',
-                    value: 'newTicket'
-                },
-                {
-                    emoji: '🦙',
-                    label: 'Support',
-                    description: 'Ask for help',
-                    value: 'newTicket_Support'
-                },
-                {
-                    emoji: '🐎',
-                    label: 'Moderation',
-                    description: 'Talking with the team',
-                    value: 'newTicket_Moderation'
+              {
+                emoji: '💬', //можно заменить на любой свой эмодзи 
+                label: 'Суд', //можно поменять навзание но при этом нужно будет заменить newTicket_(ваше название)
+                description: 'Позвать судью',  //отображение в панели 
+                value: 'newTicket_Суд',
+              },
+              {
+                emoji: '💂', //можно заменить на любой свой эмодзи 
+                label: 'Гвардия', //можно поменять навзание но при этом нужно будет заменить newTicket_(ваше название)
+                description: 'Позвать гвардию',  //отображение в панели 
+                value: 'newTicket_Гвардия',
+              },
+              {
+                emoji: '🆘', //можно заменить на любой свой эмодзи 
+                label: 'Помощь', //можно поменять навзание но при этом нужно будет заменить newTicket_(ваше название)
+                description: 'Позвать администрацию',
+                value: 'newTicket_Помощь', //читайте (//) в label 
+              },
+              {
+                emoji: '💰', //можно заменить на любой свой эмодзи 
+                label: 'Банк', //можно поменять навзание но при этом нужно будет заменить newTicket_(ваше название)
+                description: 'Позвать банкира', //отображение в панели 
+                value: 'newTicket_Банк', //читайте (//) в label 
                 },
             ]);
 
             const row = new MessageActionRow().addComponents(selectMenu);
 
-            return int.reply({ content: 'What will be the reason for the ticket ?', components: [row], ephemeral: true });
+            return int.reply({ content: 'Какова  причина создания тикета?', components: [row], ephemeral: true });
         }
 
         case 'newTicket': {
+          const roleMappings = {
+            'newTicket_Суд': '924624970028548096', //замените на свои роли
+            'newTicket_Гвардия': '1091083013946867787', //замените на свои роли
+            'newTicket_Помощь': '996736764561604658', //замените на свои роли
+            'newTicket_Банк': '1081290577066340484', //замените на свои роли
+          };
+          
+          module.exports = async (client, int) => {
+        
+          };
+          
+      
             const reason = int.values[0].split('_')[1];
-
-            const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
-
+      
+            const channel = int.guild.channels.cache.find((x) => x.name === `ticket-${int.member.id}`);
+      
             if (!channel) {
-                await int.guild.channels.create(`ticket-${int.member.id}`, {
-                    type: 'GUILD_TEXT',
-                    topic: `Ticket created by ${int.member.user.username}${reason ? ` (${reason})` : ''} ${new Date(Date.now()).toLocaleString()}`,
-                    permissionOverwrites: [
-                        {
-                            id: int.guild.id,
-                            deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                        },
-                        {
-                            id: int.member.id,
-                            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                        },
-                        {
-                            id: client.user.id,
-                            allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                        }
-                    ]
-                });
+              await int.guild.channels.create(`ticket-${int.member.id}`, {
+                type: 'GUILD_TEXT',
+                topic: `Ticket created by ${int.member.user.username}${
+                  reason ? ` (${reason})` : ''
+                } ${new Date(Date.now()).toLocaleString()}`,
+                permissionOverwrites: [
+                  {
+                    id: int.guild.id,
+                    deny: ['VIEW_CHANNEL'],
+                  },
+                  {
+                    id: int.member.id,
+                    allow: ['VIEW_CHANNEL'],
+                  },
+                  {
+                    id: roleMappings[int.values[0]],
+                    allow: ['VIEW_CHANNEL'],
+                  },
+                ],
+              });
 
                 const channel = int.guild.channels.cache.find(x => x.name === `ticket-${int.member.id}`);
 
                 const ticketEmbed = new MessageEmbed();
 
                 ticketEmbed.setColor('GREEN');
-                ticketEmbed.setAuthor(`Your ticket has been successfully created ${int.member.user.username}${reason ? ` (${reason})` : ''} ✅`);
-                ticketEmbed.setDescription('*To close the current ticket click on the reaction below, warning it is impossible to go back !*');
+                ticketEmbed.setAuthor(`Ваш тикет был успешно создан ${int.member.user.username}${reason ? ` (${reason})` : ''} ✅`);
+                ticketEmbed.setDescription('*Чтобы закрыть текущий тикет, нажмите на реакцию ниже, предупреждая, что вернуться назад невозможно!');
 
                 const closeButton = new MessageButton();
 
                 closeButton.setStyle('DANGER');
-                closeButton.setLabel('Close this ticket');
+                closeButton.setLabel('Закрыть этот тикет');
                 closeButton.setCustomId(`closeTicket_${int.member.id}`);
 
                 const row = new MessageActionRow().addComponents(closeButton);
 
                 await channel.send({ embeds: [ticketEmbed], components: [row] });
 
-                return int.update({ content: `Your ticket is open <@${int.member.id}> <#${channel.id}> ✅`, components: [], ephemeral: true });
+                return int.update({ content: `Ваш тикет был открыт <@${int.member.id}> <#${channel.id}> ✅`, components: [], ephemeral: true });
             } else {
-                return int.update({ content: `You already have an open ticket <#${channel.id}> ❌`, components: [], ephemeral: true });
+                return int.update({ content: `У вас уже есть открытый тикет <#${channel.id}> ❌`, components: [], ephemeral: true });
             }
         }
 
         case 'closeTicket': {
-            const channel = int.guild.channels.cache.get(int.channelId);
-
-            await channel.edit({
-                permissionOverwrites: [
-                    {
-                        id: int.guild.id,
-                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    },
-                    {
-                        id: int.customId.split('_')[1],
-                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    },
-                    {
-                        id: client.user.id,
-                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    }
-                ]
-            });
+          const channel = int.guild.channels.cache.get(int.channelId);
+         
+          await channel.edit({
+            permissionOverwrites: [
+              {
+                id: int.guild.id,
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: int.member.id,
+                allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: client.user,
+                allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '924624970028548096', //суд //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '996736764561604658', //помощь //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '1081290577066340484', //банк //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '1091083013946867787', //гвардия //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '996736764561604658', //модер //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+              {
+                id: '924747471643639878', //админ //замените на свои роли
+                deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+              },
+            ],
+          });
 
             const ticketEmbed = new MessageEmbed();
 
             ticketEmbed.setColor('RED');
-            ticketEmbed.setAuthor(`${int.member.user.username} has decided to close this ticket ❌`);
-            ticketEmbed.setDescription('*To permanently delete the ticket or to reopen the ticket click on the button below.*');
+            ticketEmbed.setAuthor(`${int.member.user.username} решил закрыть данный тикет ❌`);
+            ticketEmbed.setDescription('*Для окончательного удаления тикета или его повтороного открытия нажмите на реакицю ниже.*');
 
             const reopenButton = new MessageButton();
 
             reopenButton.setStyle('SUCCESS');
-            reopenButton.setLabel('Reopen this ticket');
+            reopenButton.setLabel('Переоткрыть этот тикет');
             reopenButton.setCustomId(`reopenTicket_${int.customId.split('_')[1]}`);
 
             const saveButton = new MessageButton();
 
             saveButton.setStyle('SUCCESS');
-            saveButton.setLabel('Save this ticket');
+            saveButton.setLabel('Сохранить этот тикет');
             saveButton.setCustomId(`saveTicket_${int.customId.split('_')[1]}`);
 
             const deleteButton = new MessageButton();
 
             deleteButton.setStyle('DANGER');
-            deleteButton.setLabel('Delete this ticket');
+            deleteButton.setLabel('Удалить этот тикет');
             deleteButton.setCustomId('deleteTicket');
 
             const row = new MessageActionRow().addComponents(reopenButton, saveButton, deleteButton);
@@ -140,27 +184,51 @@ module.exports = async (client, int) => {
             const channel = int.guild.channels.cache.get(int.channelId);
 
             await channel.edit({
-                permissionOverwrites: [
-                    {
-                        id: int.guild.id,
-                        deny: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    },
-                    {
-                        id: int.customId.split('_')[1],
-                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    },
-                    {
-                        id: client.user.id,
-                        allow: ['VIEW_CHANNEL', 'SEND_MESSAGES']
-                    }
+              permissionOverwrites: [
+                {
+                  id: int.guild.id,
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: int.member.id,
+                  allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: client.user,
+                  allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '924624970028548096', //суд //замените на свои роли
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '996736764561604658', //помощь //замените на свои роли
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '1081290577066340484', //банк //замените на свои роли
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '1091083013946867787', //гвардия //замените на свои роли
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '996736764561604658', //модер //замените на свои роли 
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
+                {
+                  id: '924747471643639878', //админ //замените на свои роли
+                  deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+                },
                 ]
             });
 
             const ticketEmbed = new MessageEmbed();
 
             ticketEmbed.setColor('GREEN');
-            ticketEmbed.setAuthor(`The ticket has been reopened ✅`);
-            ticketEmbed.setDescription('*To close the current ticket click on the reaction below, warning it is impossible to go back !*');
+            ticketEmbed.setAuthor(`"'Этот тикет был открыт заново'" ✅`);
+            ticketEmbed.setDescription('*Чтобы закрыть текущий тикет, нажмите на реакцию ниже, предупреждая, что вернуться назад невозможно!');
 
             const closeButton = new MessageButton();
 
@@ -190,7 +258,7 @@ module.exports = async (client, int) => {
                     return `${date} - ${user} : ${m.attachments.size > 0 ? m.attachments.first().proxyURL : m.content}`;
                 }).reverse().join('\n');
 
-                if (messages.length < 1) messages = 'There are no messages in this ticket... strange';
+                if (messages.length < 1) messages = 'В этом тикете нет сообщений... странно';
 
                 const ticketID = Date.now();
 
@@ -207,4 +275,40 @@ module.exports = async (client, int) => {
             });
         }
     }
-};
+
+ client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand() || interaction.commandName !== 'tickets') {
+      return;
+    }
+  
+    const member = interaction.member;
+  
+    if (member.roles.cache.has('996736764561604658') || member.roles.cache.has('924747471643639878')) {
+        // Пользователь имеет одну из нужных ролей, показываем все открытые тикеты
+        const openTickets = await Ticket.findAll({ where: { resolved: false } });
+      
+        if (openTickets.length === 0) {
+          return int.reply({ content: 'Открытых тикетов нет.', ephemeral: true });
+        }
+      
+        const openTicketEmbeds = openTickets.map((ticket) => {
+          // Формируем embed для каждого открытого тикета
+          // ...
+        });
+      
+        return int.reply({ embeds: openTicketEmbeds, ephemeral: true });
+      }
+      const userTickets = await Ticket.findAll({ where: { userId: member.id } });
+
+      if (userTickets.length === 0) {
+        return int.reply({ content: 'У вас нет открытых тикетов.', ephemeral: true });
+      }
+      
+      const userTicketEmbeds = userTickets.map((ticket) => {
+        // Формируем embed для каждого тикета, созданного пользователем
+        // ...
+      });
+      
+      return int.reply({ embeds: userTicketEmbeds, ephemeral: true });
+    });   
+}
